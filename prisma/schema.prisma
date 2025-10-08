@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" // atau "mysql" kalau kamu pakai MySQL lokal
+  url      = env("DATABASE_URL")
+}
+
+model Collection {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  image       String
+  products    Product[] // 1 collection punya banyak product
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id           String      @id @default(uuid())
+  title        String
+  description  String
+  media        Json    // list gambar
+  tags         Json
+  sizes        Json
+  colors       Json
+  price        Float
+  expense      Float
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relasi ke Collection
+  collection   Collection  @relation(fields: [collectionId], references: [id])
+  collectionId String
+
+  // Relasi ke OrderItem
+  orderItems   OrderItem[]
+}
+
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique  
+  orders    Order[]
+
+  // relasi balik ke User (pakai nama relasi yang sama)
+  user      User?     @relation("UserCustomer")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Order {
+  id          String       @id @default(uuid())
+  customer    Customer     @relation(fields: [customerId], references: [id])
+  customerId  String
+  totalAmount Float
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // relasi ke item dalam order
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  order      Order    @relation(fields: [orderId], references: [id])
+  orderId    String
+
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+
+  title      String
+  color      String
+  size       String
+  quantity   Int
+  price      Float
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+model User {
+  id          String     @id @default(uuid())
+  name        String
+  email       String     @unique
+  password    String
+  role        Role       @default(CUSTOMER)
+
+  // Relasi ke Customer (satu user bisa punya satu customer profile)
+  customer    Customer?  @relation("UserCustomer", fields: [customerId], references: [id])
+  customerId  String?    @unique  
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
