@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql" // atau "mysql" kalau kamu pakai MySQL lokal
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -12,16 +12,16 @@ model Collection {
   title       String
   description String
   image       String
-  products    Product[] // 1 collection punya banyak product
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  products    Product[]
 }
 
 model Product {
   id           String      @id @default(uuid())
   title        String
   description  String
-  media        Json    // list gambar
+  media        Json
   tags         Json
   sizes        Json
   colors       Json
@@ -29,72 +29,57 @@ model Product {
   expense      Float
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
-
-  // Relasi ke Collection
-  collection   Collection  @relation(fields: [collectionId], references: [id])
   collectionId String
-
-  // Relasi ke OrderItem
   orderItems   OrderItem[]
+  collection   Collection  @relation(fields: [collectionId], references: [id])
 }
 
 model Customer {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
-  email     String    @unique  
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   orders    Order[]
-
-  // relasi balik ke User (pakai nama relasi yang sama)
-  user      User?     @relation("UserCustomer")
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  user      User?    @relation("UserCustomer")
 }
 
 model Order {
-  id          String       @id @default(uuid())
-  customer    Customer     @relation(fields: [customerId], references: [id])
+  id          String      @id @default(uuid())
   customerId  String
   totalAmount Float
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  // relasi ke item dalam order
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  customer    Customer    @relation(fields: [customerId], references: [id])
   items       OrderItem[]
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  order      Order    @relation(fields: [orderId], references: [id])
-  orderId    String
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  title     String
+  color     String
+  size      String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
 
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  String
-
-  title      String
-  color      String
-  size       String
-  quantity   Int
-  price      Float
+model User {
+  id         String    @id @default(uuid())
+  name       String
+  email      String    @unique
+  password   String
+  role       Role      @default(CUSTOMER)
+  customerId String?   @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  customer   Customer? @relation("UserCustomer", fields: [customerId], references: [id])
 }
 
 enum Role {
   ADMIN
   CUSTOMER
 }
-
-model User {
-  id          String     @id @default(uuid())
-  name        String
-  email       String     @unique
-  password    String
-  role        Role       @default(CUSTOMER)
-
-  // Relasi ke Customer (satu user bisa punya satu customer profile)
-  customer    Customer?  @relation("UserCustomer", fields: [customerId], references: [id])
-  customerId  String?    @unique  
-
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-}
-

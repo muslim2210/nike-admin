@@ -23,7 +23,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, token: null }),
     }),
     {
-      name: "auth_admin", // disimpan di localStorage
+      name: "nike-admin", // disimpan di localStorage
     }
   )
 );
