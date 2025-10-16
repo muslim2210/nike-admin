@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
 // import { set } from "zod";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -13,7 +13,7 @@ export default function RegisterPage() {
 
   const [error, setError] = useState("");
   const router = useRouter();
-  const login = useAuthStore((s) => s.login);
+
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -51,9 +51,9 @@ export default function RegisterPage() {
         className="bg-white shadow-md rounded-md p-6 w-full md:w-[400px]"
       >
         <div className="mb-4 w-full flex justify-center">
-          Nike Admin
+          <Image src='/logo.svg' alt="Logo" width={100} height={100} />
         </div>
-        <h1 className="text-xl font-bold mb-4">Register</h1>
+        <h1 className="text-xl font-bold text-left mb-4">Register</h1>
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <input

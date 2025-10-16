@@ -120,3 +120,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.title-page {
+  @apply text-2xl font-semibold text-black;
+}

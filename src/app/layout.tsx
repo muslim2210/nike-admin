@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PrivateRouteMiddleware from "@/components/auth/PrivateRouteMiddleware";
 import { usePathname } from "next/navigation";
+import SideBar from "@/components/layout/SideBar";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,9 +40,13 @@ export default function RootLayout({
           <>{children}</>
         ) : (
           <PrivateRouteMiddleware requiredRole="ADMIN">
-            {children}
+            <div className="flex max-lg:flex-col text-primaryBlack">
+            <SideBar />
+            <div className="flex-1">{children}</div>
+          </div>
           </PrivateRouteMiddleware>
         )}
+        <Toaster position="top-center" richColors/>
       </body>
     </html>
   );

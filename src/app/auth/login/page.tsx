@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -49,7 +50,7 @@ export default function LoginPage() {
         className="bg-white shadow-md rounded-md p-6 w-full md:w-[400px]"
       >
         <div className="w-full flex items-center justify-center mb-5">
-          Nike admin
+          <Image src='/logo.svg' alt="Logo" width={100} height={100} />
         </div>
         <h1 className="text-xl font-bold mb-4">Login</h1>
         {error && <p className="text-red-500 text-sm">{error}</p>}
