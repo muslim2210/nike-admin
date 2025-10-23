@@ -1,9 +1,10 @@
 "use client";
 
 import { CldUploadWidget } from "next-cloudinary";
-import { Plus, Trash } from "lucide-react";
 import Image from "next/image";
-import { Button } from "../ui/button";
+import { Plus, Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface ImageUploadProps {
   value?: string | string[];
@@ -12,12 +13,14 @@ interface ImageUploadProps {
   multiple?: boolean;
 }
 
-const UploadImageComponent: React.FC<ImageUploadProps> = ({
+export default function UploadImageComponent({
   value = "",
   onChange,
   onRemove,
   multiple = false,
-}) => {
+}: ImageUploadProps) {
+  const [uploading, setUploading] = useState(false);
+
   const values = Array.isArray(value)
     ? value
     : value
@@ -26,28 +29,16 @@ const UploadImageComponent: React.FC<ImageUploadProps> = ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUpload = (result: any) => {
-    console.log("[UPLOAD_RESULT]", result); // ✅ lihat hasil di console
     const newUrl = result?.info?.secure_url;
 
-    if (!newUrl) {
-      console.error("[UPLOAD_ERROR] secure_url tidak ditemukan:", result);
-      return;
-    }
+    if (!newUrl) return;
 
     if (multiple) {
-      onChange([...values, newUrl]);
+      const updated = [...values, newUrl];
+      onChange(updated);
     } else {
       onChange(newUrl);
     }
-  };
-
-  const handleRemove = (url: string) => {
-    if (multiple && Array.isArray(value)) {
-      onChange(value.filter((item) => item !== url));
-    } else {
-      onChange("");
-    }
-    if (onRemove) onRemove(url);
   };
 
   return (
@@ -67,7 +58,15 @@ const UploadImageComponent: React.FC<ImageUploadProps> = ({
                 <div className="absolute right-1 top-1 z-10">
                   <Button
                     type="button"
-                    onClick={() => handleRemove(url)}
+                    onClick={() => {
+                      if (multiple) {
+                        const filtered = values.filter((item) => item !== url);
+                        onChange(filtered);
+                      } else {
+                        onChange("");
+                      }
+                      if (onRemove) onRemove(url);
+                    }}
                     className="bg-red-500 text-white hover:bg-red-600"
                     size="icon"
                   >
@@ -93,12 +92,17 @@ const UploadImageComponent: React.FC<ImageUploadProps> = ({
             multiple,
             maxFileSize: 2_000_000,
           }}
-          onSuccess={handleUpload}
+          onOpen={() => setUploading(true)}
+          onClose={() => setUploading(false)}
+          onSuccess={(result) => {
+            handleUpload(result);
+          }}
         >
           {({ open }) => (
             <button
               type="button"
               onClick={() => open?.()}
+              disabled={uploading}
               className="text-white py-2 bg-black px-4 rounded-full flex items-center justify-center mx-auto hover:bg-gray-800"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -113,6 +117,4 @@ const UploadImageComponent: React.FC<ImageUploadProps> = ({
       </div>
     </div>
   );
-};
-
-export default UploadImageComponent;
+}

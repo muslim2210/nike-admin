@@ -1,5 +1,8 @@
 // ==========================
 // 📦 Collection
+
+import { ProductFormType } from "@/lib/schema";
+
 // ==========================
 export type CollectionType = {
   id: string;
@@ -14,7 +17,7 @@ export type CollectionType = {
 // ==========================
 // 🛍️ Product
 // ==========================
-export type ProductType = {
+export interface ProductType extends ProductFormType {
   id: string;
   title: string;
   description: string;
@@ -38,9 +41,14 @@ export type CustomerType = {
   id: string;
   name: string;
   email: string;
+  password: string;
+  address?: string;
+  phone?: string;
   createdAt: Date;
   updatedAt: Date;
+  whistlist?: ProductType[];
   orders?: OrderType[];
+  
 };
 
 // ==========================
@@ -86,8 +94,6 @@ export type UserModel = {
   email: string;
   password: string;
   role: "ADMIN" | "CUSTOMER";
-  customerId: string | null;
-  customer?: CustomerType;
   createdAt: Date;
   updatedAt: Date;
 }

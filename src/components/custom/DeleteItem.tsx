@@ -5,6 +5,7 @@ import { Trash } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { toast } from 'sonner';
 import { useCollectionApi } from '@/hooks/useCollectionApi';
+import { useProductsApi } from '@/hooks/useProductsApi';
 interface DeleteProps {
   item: string;
   id: string;
@@ -14,23 +15,42 @@ interface DeleteProps {
 const DeleteItem: React.FC<DeleteProps> = ({ item, id, onDeleted }) => {
   const [loading, setLoading] = useState(false);
   const { deleteCollectionApi } = useCollectionApi();
+  const { deleteProductApi } = useProductsApi();
 
   const onDelete = async () => {
     setLoading(true);
-    deleteCollectionApi(id)
-    .then(() => {
-      console.info(`[DELETE_${item.toUpperCase()}]`, item, id);
-      toast.success(`${item} deleted successfully!`);
-      onDeleted?.();
-    })
-    .catch((err) => {
-      toast.error(err.message || err || "Something went wrong, please try again.");
-      console.log(`[DELETE_${item.toUpperCase()}]`, err)
-    })
-    .finally(() => setLoading(false));
-  };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let deleteFn: (id: string) => Promise<any>;
 
+    switch (item) {
+        case "collections":
+          deleteFn = deleteCollectionApi;
+          break;
+        case "products":
+          deleteFn = deleteProductApi;
+          break;
+        default:
+          throw new Error(`Unknown item type: ${item}`);
+      }
+
+      await deleteFn(id).then(() => {
+        console.info(`[DELETE_${item.toUpperCase()}]`, id);
+        toast.success(`${item} deleted successfully!`);
+        onDeleted?.();
+      }).catch((err) => {
+        console.error(`[DELETE_${item.toUpperCase()}_ERROR]`, err);
+        toast.error(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Something went wrong while deleting."
+        );
+      }).finally(() => {
+        setLoading(false);
+      });
+  }
+
+  
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>

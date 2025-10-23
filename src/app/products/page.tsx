@@ -7,42 +7,39 @@ import { Separator } from "@/components/ui/separator";
 import { ProductType } from "@/types/model";
 import Loader from "@/components/ui/Loader";
 import { DataTable, useDataTable } from "@/components/shared/TableComponent";
-import { ColumnDef } from "@tanstack/react-table";
+import { useProductsApi } from "@/hooks/useProductsApi";
+import { columns } from "@/components/layout/ProductColumn";
+import { toast } from "sonner";
 
-const columns: ColumnDef<ProductType>[] = [
-  { accessorKey: "media", header: "Media" },
-  { accessorKey: "title", header: "Title" },
-  { accessorKey: "collection", header: "Collection" },
-  { accessorKey: "sizes", header: "Sizes" },
-  { accessorKey: "colors", header: "Colors" },
-  { accessorKey: "price", header: "Price" },
-];
 
-const Products = () => {
+
+const ProductsPage = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [products, setProducts ] = useState<ProductType[]>([]);
 
-  const getProducts = async () => {
-    try {
-      const res = await fetch("/api/products", {
-        method: "GET",
-      });
-      const data = await res.json();
-      console.warn("[products_GET]", data);
-      setProducts(data.data as ProductType[]);
-      setLoading(false);
-    } catch (err) {
-      console.log("[products_GET]", err);
-    }
+  const { getProductsApi } = useProductsApi();
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    getProductsApi().then((data) => {
+      console.info("[products_GET]", data);
+      setProducts(data as ProductType[]);
+    })
+    .catch((err) => {
+      console.error("[products_GET]", err)
+      toast.error(err.message || err || "Something went wrong, please try again.");
+    })
+    .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    getProducts();
+    fetchProducts();
   }, []);
 
-  const { table } = useDataTable(products, columns);
+  const cols = columns({ onDeleted: fetchProducts });
+  const { table } = useDataTable(products, cols);
 
   return loading ? (
     <Loader />
@@ -54,17 +51,17 @@ const Products = () => {
         </p>
         <Button
         className="rounded-full flex justify-center items-center w-7 h-7"
-          onClick={() => router.push("/products/new")}
+          onClick={() => router.push("/products/create")}
         >
           <Plus className="h-4 w-4" />
         </Button>
       </div>
       <Separator className="mt-2" />
-      <DataTable table={table} columns={columns} searchKey="title" />
+      <DataTable table={table} columns={cols} searchKey="title" />
     </div>
   );
 };
 
 export const dynamic = "force-dynamic";
 
-export default Products;
+export default ProductsPage;

@@ -20,13 +20,7 @@ import { toast } from "sonner"
 import { CollectionType } from "@/types/model";
 import UploadImageComponent from "../custom/UploadImageComponent";
 import { useCollectionApi } from "@/hooks/useCollectionApi";
-
-// 🔹 Schema validasi
-const formSchema = z.object({
-  title: z.string().min(3, "Minimal 3 karakter").max(100),
-  description: z.string().min(5, "Minimal 5 karakter").max(1000).trim(),
-  image: z.string().min(3, "image is required"),
-});
+import { formSchemaCollection } from "@/lib/schema";
 
 // 🔹 Tipe props
 interface CollectionFormProps {
@@ -38,8 +32,8 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
   const [loading, setLoading] = useState(false);
   const { createCollectionApi, updateCollectionApi } = useCollectionApi();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof formSchemaCollection>>({
+    resolver: zodResolver(formSchemaCollection),
     defaultValues: initialData || {
       title: "",
       description: "",
@@ -48,7 +42,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
   });
 
   // 🔹 Submit handler untuk Create / Update
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchemaCollection>) => {
     try {
       setLoading(true);
 
@@ -103,7 +97,7 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
         </p>
       )}
 
-      <Separator className="bg-primaryBlack mt-4 mb-7" />
+      <Separator className="mt-4 mb-7" />
 
       {/* Form */}
       <div className="max-w-[600px] lg:max-w-[900px]">
